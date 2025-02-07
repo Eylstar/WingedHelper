@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Sprites>
+    
+    <WingedHelper_wings path="WingedHelper/" start="flap">
+        <Center/>
+        <Loop id="flap" path="wings" delay=".08" frames="0-8,0-8,0-7,9" />
+    </WingedHelper_wings>
+    
+    <WingedHelper_left_wing path="WingedHelper/" start="flap">
+        <Center/>
+        <Loop id="flap" path="leftWing" delay=".08" frames="0-8,0-8,0-7,9" />
+    </WingedHelper_left_wing>
+    
+    <WingedHelper_right_wing path="WingedHelper/" start="flap">
+        <Center/>
+        <Loop id="flap" path="rightWing" delay=".08" frames="0-8,0-8,0-7,9" />
+    </WingedHelper_right_wing>
+    
+    <WingedHelper_wing path="WingedHelper/" start="flap">
+        <Center/>
+        <Loop id="flap" path="wing" delay=".08" frames="0-8,0-8,0-7,9" />
+    </WingedHelper_wing>
+    
+</Sprites>
+

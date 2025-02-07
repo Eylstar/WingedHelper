@@ -1,0 +1,16 @@
+entities.WingedHelper/WingedAdder.attributes.description.selectedTypes=The types of entities that will have wings added
+entities.WingedHelper/WingedAdder.attributes.description.direction=The direction the entity will fly to once activated
+entities.WingedHelper/WingedAdder.attributes.description.blacklist=If blacklist mode is activated, the Selected Types field will act as a blacklist instead of a whitelist
+entities.WingedHelper/WingedAdder.attributes.description.inAreaRange=If enabled, only entities within the adder range will have wings added
+entities.WingedHelper/WingedAdder.attributes.description.actorsOnly=If enabled, will filter out entities that are not Actors
+entities.WingedHelper/WingedAdder.attributes.description.collidablesOnly=If enabled, will filter out entities that dont have Collider
+entities.WingedHelper/WingedAdder.attributes.description.isHeavyWings=If enabled and on an Holdable, the grabbed player will fly with the entity once the wings are activated
+entities.WingedHelper/WingedAdder.attributes.description.allowInteractions=If enabled, the entity will be able to interact with the player after the wings are activated
+entities.WingedHelper/WingedAdder.attributes.description.disableCollisions=If enabled, the entity will stop colliding with Solids after the wings are activated
+entities.WingedHelper/WingedAdder.attributes.description.rainbowWings=Make your wings extra gay~
+entities.WingedHelper/WingedAdder.attributes.description.moveDelay=The delay before the entity starts flying
+entities.WingedHelper/WingedAdder.attributes.description.flySpeed=The speed at which the entity will fly
+entities.WingedHelper/WingedAdder.attributes.description.leftWingXOffset=Let's you adjust the left wing's sprite position on the X axis
+entities.WingedHelper/WingedAdder.attributes.description.leftWingYOffset=Let's you adjust the left wing's sprite position on the Y axis
+entities.WingedHelper/WingedAdder.attributes.description.rightWingXOffset=Let's you adjust the right wing's sprite position on the X axis
+entities.WingedHelper/WingedAdder.attributes.description.rightWingYOffset=Let's you adjust the right wing's sprite position on the Y axis
