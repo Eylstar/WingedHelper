@@ -12,6 +12,10 @@ There is the CS code of it, if you search the mod download it's here : [GameBana
 ## How to use
 
 
+
+
+
+
 In Lönn, just add a *WingedAdder* Entity in your room.
 
 Then you can tweak its filter options to target the entities you want to add wings to, the behaviour of wings, positions and many more things :
@@ -36,3 +40,11 @@ Then you can tweak its filter options to target the entities you want to add win
 - **Wings Offset** : allows you to place each wing independently in the Y and X axes
 - **Wing Tint** : allows you to customize the color of each wing
 - **Rainbow Wings** : because why not
+
+
+---
+
+## Notes
+
+Since this entity can target almost every entity, vanilla or modded, except some dose of Jank sometimes
+Also, big thanks to JaThePlayer for bits of code from FrostHelper
