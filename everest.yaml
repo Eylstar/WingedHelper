@@ -1,5 +1,5 @@
 - Name: WingedHelper
-  Version: 0.2.0
+  Version: 1.0.0
   DLL: bin/WingedHelper.dll
   Dependencies:
     - Name: EverestCore
