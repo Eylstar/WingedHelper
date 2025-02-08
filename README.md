@@ -46,5 +46,5 @@ Then you can tweak its filter options to target the entities you want to add win
 
 ## Notes
 
-Since this entity can target almost every entity, vanilla or modded, except some dose of Jank sometimes
+Since this entity can target almost every entity, vanilla or modded, except some dose of Jank sometimes.
 Also, big thanks to JaThePlayer for bits of code from FrostHelper
