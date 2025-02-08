@@ -16,7 +16,7 @@ namespace Celeste.Mod.WingedHelper;
 
 public class EntityFilter
 {
-    static readonly Type[] defaultBlackLisTypes =
+    static readonly Type[] defaultBlackListTypes =
     [
         typeof(Player),
         typeof(SolidTiles),
@@ -34,7 +34,6 @@ public class EntityFilter
         typeof(FormationBackdrop),
         typeof(TrailManager),
         typeof(GlassBlockBg),
-        typeof(WingedAdder),
         typeof(MirrorSurface),
         typeof(MirrorSurfaces),
         typeof(WaterSurface),
@@ -59,7 +58,7 @@ public class EntityFilter
         HashSet<Type> hs = TypeHelper.GetTypesAsHashSet(str);
         if (bl)
         {
-            foreach (Type t in defaultBlackLisTypes)
+            foreach (Type t in defaultBlackListTypes)
                 hs.Add(t);
         }
 

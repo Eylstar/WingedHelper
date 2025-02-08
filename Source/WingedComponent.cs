@@ -294,6 +294,12 @@ public class WingComponent : Component
             leftWing.Color = Calc.HsvToColor(hue, 0.75f,0.75f);
             rightWing.Color = Calc.HsvToColor(hue, 0.75f, 0.75f);
         }
+        
+        if(leftWing.CurrentAnimationFrame % 9 == 4)
+        {
+            //Audio.Play("event:/game/general/strawberry_wingflap", Entity.Position);
+        }
+        
         if (!flying) return;
         flyUpTween.Update();
     }
