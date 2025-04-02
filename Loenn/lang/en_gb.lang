@@ -14,3 +14,7 @@ entities.WingedHelper/WingedAdder.attributes.description.leftWingXOffset=Let's y
 entities.WingedHelper/WingedAdder.attributes.description.leftWingYOffset=Let's you adjust the left wing's sprite position on the Y axis
 entities.WingedHelper/WingedAdder.attributes.description.rightWingXOffset=Let's you adjust the right wing's sprite position on the X axis
 entities.WingedHelper/WingedAdder.attributes.description.rightWingYOffset=Let's you adjust the right wing's sprite position on the Y axis
+entities.WingedHelper/WingedAdder.attributes.description.dashsToActivate=The number of dashes required to activate the wings
+entities.WingedHelper/WingedAdder.attributes.description.counterTintColor=The color of the counter of dashes
+entities.WingedHelper/WingedAdder.attributes.description.counterXOffset=Let's you adjust the counter's position on the X axis
+entities.WingedHelper/WingedAdder.attributes.description.counterYOffset=Let's you adjust the counter's position on the Y axis

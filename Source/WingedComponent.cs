@@ -5,6 +5,8 @@ using Celeste.Mod.Entities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Monocle;
+using Celeste.Mod.UI;
+using System.Text.RegularExpressions;
 
 namespace Celeste.Mod.WingedHelper;
 
@@ -61,13 +63,23 @@ public class WingComponent : Component
     
     Color leftWingColor;
     Color rightWingColor;
+    Color counterColor;
     
     bool rainbowWings;
     float hue = 0f;
     
+    bool flySounds;
+    bool flapSounds;
+    
+    int dashsToActivate;
+    
+    PlutoniumText text;
+    Vector2 counterOffset;
+    
     
     public WingComponent(float delay = 1.0f, int upSpeed = 10, bool heavy = false, FlyDirection dir = FlyDirection.Up, bool act = false, bool col = false, Vector2 leftOffset = new(), Vector2 rightOffset = new(), 
-        bool disableCol = false, bool allowInter = true, string leftColor = "FFFFFF", string rightColor = "FFFFFF", bool rainbow = false) : base(true, false)
+        bool disableCol = false, bool allowInter = true, string leftColor = "FFFFFF", string rightColor = "FFFFFF", bool rainbow = false, 
+        bool flyS = true, bool flapS = false, int dashs = 1, string counterCol = "FFFFFF", Vector2 counterOff = new()) : base(true, false)
     {
         heavyWings = heavy;
         flyDelay = delay;
@@ -82,6 +94,11 @@ public class WingComponent : Component
         leftWingColor = Calc.HexToColor(leftColor);
         rightWingColor = Calc.HexToColor(rightColor);
         rainbowWings = rainbow;
+        flySounds = flyS;
+        flapSounds = flapS;
+        dashsToActivate = dashs;
+        counterOffset = counterOff;
+        counterColor = Calc.HexToColor(counterCol);
     }
 
     public override void Added(Entity entity)
@@ -91,6 +108,8 @@ public class WingComponent : Component
         player = Scene.Tracker.GetEntity<Player>();
         
         if (isOnAnActor) actor = (Actor) entity;
+        
+        Visible = true;
         
         canBeGrabbed = entity.Get<Holdable>() != null;
         if (canBeGrabbed)
@@ -243,6 +262,10 @@ public class WingComponent : Component
         Entity.Add(rightWing);
         leftWing.Play("flap");
         rightWing.Play("flap");
+
+        
+        text = new PlutoniumText("WingedHelper/numbers", "0123456789", new Vector2(4, 6));
+        Entity.Add(text);
     }
     
     void OnPickup()
@@ -259,7 +282,7 @@ public class WingComponent : Component
         justThrowed = false;
         flying = false;
     }
-    
+
     void OnRelease(Vector2 force)
     {
         isGrabbed = false;
@@ -281,7 +304,12 @@ public class WingComponent : Component
     void OnDash(Vector2 dir)
     {
         if (flying || wingsActivated) return;
-        Entity.Add(new Coroutine(FlyAwayRoutine()));
+        dashsToActivate--;
+        if (dashsToActivate <= 0)
+        {
+            Entity.Add(new Coroutine(FlyAwayRoutine()));
+            dashsToActivate = 0;
+        }
     }
 
     public override void Update()
@@ -297,20 +325,27 @@ public class WingComponent : Component
         
         if(leftWing.CurrentAnimationFrame % 9 == 4)
         {
-            //Audio.Play("event:/game/general/strawberry_wingflap", Entity.Position);
+            if (flapSounds)
+                Audio.Play("event:/game/general/strawberry_wingflap", Entity.Position);
         }
         
         if (!flying) return;
         flyUpTween.Update();
     }
 
+    public override void Render()
+    {
+        base.Render();
+        text.PrintCentered(Entity.Position + counterOffset, dashsToActivate.ToString(),  true, 5, counterColor, Color.Black, 1f);
+    }
+
     IEnumerator FlyAwayRoutine()
     {
         rotateWiggler.Start();
         yield return 0.1f;
-        Audio.Play("event:/game/general/strawberry_laugh", Entity.Position);
+        if (flySounds) Audio.Play("event:/game/general/strawberry_laugh", Entity.Position);
         yield return 0.2f;
-        Audio.Play("event:/game/general/strawberry_flyaway", Entity.Position);
+        if (flySounds) Audio.Play("event:/game/general/strawberry_flyaway", Entity.Position);
         yield return flyDelay - 0.3f;
         StartFlying();
     }

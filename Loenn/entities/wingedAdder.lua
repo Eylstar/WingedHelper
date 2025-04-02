@@ -51,7 +51,8 @@ winged_adder.fieldInformation = function(entity) return {
 
 winged_adder.fieldOrder = function(entity) return{ 
     "x", "y", "width", "height", "leftWingXOffset", "rightWingXOffset", "leftWingYOffset", "rightWingYOffset","moveDelay", 
-    "flySpeed", "direction", "selectedTypes", "leftWingTint", "rightWingTint", "blacklist", "inAreaRange", "actorsOnly", "collidablesOnly", "isHeavyWings", "allowInteractions", "disableCollisions", "rainbowWings",
+    "flySpeed", "direction", "selectedTypes", "leftWingTint", "rightWingTint", "dashsToActivate", "counterTintColor", "counterXOffset", "counterYOffset", "blacklistMode", "inAreaRange", 
+    "actorsOnly", "collidablesOnly", "isHeavyWings", "allowInteractions", "disableCollisions", "rainbowWings", "flySounds", "flapSounds",
 }end
 
 
@@ -65,7 +66,7 @@ winged_adder.placements ={
         direction = "Up",
         leftWingTint = "FFFFFF",
         rightWingTint = "FFFFFF",
-        blacklist = false,
+        blacklistMode = false,
         inAreaRange = true,
         actorsOnly = false,
         collidablesOnly = true,
@@ -73,12 +74,18 @@ winged_adder.placements ={
         allowInteractions = true,
         disableCollisions = false,
         rainbowWings = false,
+        flySounds = true,
+        flapSounds = false,
         moveDelay = 1.0,
         flySpeed = 25.0,
         leftWingXOffset = 0,
         leftWingYOffset = 0,
         rightWingXOffset = 0,
         rightWingYOffset = 0,
+        dashsToActivate = 1,
+        counterTintColor = "FFFFFF",
+        counterXOffset = 0,
+        counterYOffset = 0,
     },
 }
 

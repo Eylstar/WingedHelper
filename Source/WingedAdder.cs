@@ -29,6 +29,12 @@ public class WingedAdder : Entity
     string leftColor;
     string rightColor;
     bool rainbow;
+    bool flySounds;
+    bool flapSounds;
+    
+    int dashsToActivate;
+    string counterColor;
+    Vector2 counterOffset = new();
     
     
     public WingedAdder(EntityData data, Vector2 offset) : base(data.Position + offset)
@@ -51,6 +57,12 @@ public class WingedAdder : Entity
         leftColor = data.Attr("leftWingTint", "FFFFFF");
         rightColor = data.Attr("rightWingTint", "FFFFFF");
         rainbow = data.Bool("rainbowWings");
+        flySounds = data.Bool("flySounds");
+        flapSounds = data.Bool("flapSounds");
+        dashsToActivate = data.Int("dashsToActivate");
+        counterColor = data.Attr("counterTintColor", "FFFFFF");
+        counterOffset.X = data.Int("counterXOffset");
+        counterOffset.Y = data.Int("counterYOffset");
     }
 
     public override void Awake(Scene scene)
@@ -73,8 +85,9 @@ public class WingedAdder : Entity
             bool hasCollider = entity.Collider != null;
             if ((!actorsOnly || (isActor && actorsOnly)) && (!collidablesOnly || (hasCollider && collidablesOnly)))
             {
-                Logger.Log(LogLevel.Warn, "WingedHelper", $"Adding WingComponent to {entity}");
-                WingComponent wingComp = new WingComponent(moveDelay, upSpeed, heavyWings, direction, isActor, hasCollider, leftWingOffset, rightWingOffset, disableCollisions, allowInteractions, leftColor, rightColor, rainbow);
+                Logger.Log(LogLevel.Info, "WingedHelper", $"Adding WingComponent to {entity}");
+                WingComponent wingComp = new WingComponent(moveDelay, upSpeed, heavyWings, direction, isActor, hasCollider, leftWingOffset, rightWingOffset, disableCollisions, 
+                    allowInteractions, leftColor, rightColor, rainbow, flySounds, flapSounds, dashsToActivate, counterColor, counterOffset);
                 entity.Add(wingComp);
             }
         }

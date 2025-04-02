@@ -9,6 +9,9 @@ using Celeste.Mod.Helpers;
 using Microsoft.Xna.Framework;
 using Monocle;
 
+using Celeste.Mod.UI;
+using Microsoft.Xna.Framework.Graphics;
+using System.Text.RegularExpressions;
 
 //Credits to JaThePlayer and FrostHelper for (big) parts of the code
 
@@ -51,7 +54,7 @@ public class EntityFilter
         isBlackList = bl;
     }
 
-    public static EntityFilter CreateFromData(EntityData data, string typesKey = "selectedTypes", string blackListKey = "blacklist")
+    public static EntityFilter CreateFromData(EntityData data, string typesKey = "selectedTypes", string blackListKey = "blacklistMode")
     {
         string str = data.Attr(typesKey, "");
         bool bl = data.Bool(blackListKey);
@@ -331,5 +334,86 @@ public static class TypeHelper
                 }
             }
         }
+    }
+}
+
+
+public class PlutoniumText : Component
+{
+    public readonly Dictionary<char, int> Charset;
+    public readonly List<MTexture> CharTextures;
+    public Vector2 FontSize;
+    public readonly string CharList;
+    
+    public PlutoniumText(string fontPath, string charList, Vector2 fontSize) : base(true, true)
+    {
+        FontSize = fontSize;
+        Charset = new Dictionary<char, int>();
+        CharTextures = new List<MTexture>();
+        string characters = CharList = charList;
+
+        for (int i = 0; i < characters.Length; i++)
+        {
+            Charset.Add(characters[i], i);
+            CharTextures.Add(GFX.Game[fontPath].GetSubtexture(i * (int)fontSize.X, 0, (int)fontSize.X, (int)fontSize.Y)); // "PlutoniumHelper/PlutoniumText/font"
+        }
+    }
+    
+    public void PrintCentered(Vector2 pos, string str, bool shadow, int spacing, Color mainColor, Color outlineColor, float scale = 1, int id = 0)
+    {
+        float stringlen = spacing * str.Length * scale;
+        Print(pos - new Vector2((float)Math.Floor(stringlen / 2f), (float)Math.Floor(FontSize.Y / 2f)), str, shadow, spacing, mainColor, outlineColor, scale, id);
+    }
+
+    public void Print(Vector2 pos, string str, bool shadow, int spacing, Color mainColor, Color outlineColor, float scale = 1, int id = 0)
+    {
+        SpriteEffects flip = SaveData.Instance.Assists.MirrorMode ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+        if (SaveData.Instance.Assists.MirrorMode) str = new string(str.Reverse().ToArray());
+        
+        pos = pos.Floor();
+
+        int index = 0;
+
+        if (outlineColor != Color.Transparent)
+        {
+            foreach (char c in str) //draw shadows
+            {
+                float offset = index * spacing * scale;
+                Vector2 charpos = pos + Vector2.UnitX * offset;
+                charpos = new Vector2((float)Math.Floor(charpos.X), (float)Math.Floor(charpos.Y));
+
+                int chr;
+                if (!Charset.ContainsKey(c))
+                    chr = 0;
+                else
+                    chr = Charset[c];
+                
+                if (shadow)
+                    CharTextures[chr].Draw(charpos + Vector2.One * scale, Vector2.Zero, outlineColor, scale, 0, flip);
+
+                index++;
+                
+            }
+        }
+
+        if (mainColor == Color.Transparent) return;
+
+        index = 0;
+
+        foreach (char c in str) //draw all characters
+        {
+            float offset = index * spacing * scale;
+            Vector2 charpos = pos + Vector2.UnitX * offset;
+            charpos = new Vector2((float)Math.Floor(charpos.X), (float)Math.Floor(charpos.Y));
+            int chr;
+            if (!Charset.TryGetValue(c, out int value))
+                chr = 0;
+            else
+                chr = value;
+
+            CharTextures[chr].Draw(charpos, Vector2.Zero, mainColor, scale, 0, flip);
+            index++;
+        }
+
     }
 }
