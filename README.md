@@ -27,7 +27,7 @@ Then you can tweak its filter options to target the entities you want to add win
 - **SelectedTypes** : this is your list of entities that the adder will target. Includes an auto-complete search for modded and weird entities class names
 - **InAreaRange** : check this if you want the adder to only compute entities that overlap its box in Lönn
 - **BlackList** : if toggled, the SelectedTypes filter list will turn into a blacklist filter, selecting every entity except the specified
-- **Actors Only** & **Collidables Only** : in case of wide or wild entity selection, lets you select only entites that have a Collider component, or that inherits from the Actor class
+- **Actors Only** & **Collidables Only** : Useful in case of wide or wild entity selection, lets you select only entites that have a Collider component, or that inherits from the Actor class
 
 ### Wings and Entity behaviour :
 - **Direction** : specify the direction in which the entity will fly (Up, Down, Left or Right)
