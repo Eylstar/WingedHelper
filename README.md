@@ -41,6 +41,9 @@ Then you can tweak its filter options to target the entities you want to add win
 - **Wing Tint** : allows you to customize the color of each wing
 - **Rainbow Wings** : because why not
 
+### Dash Counter :
+- **Dashs To Activate** :
+
 
 ---
 
