@@ -20,7 +20,7 @@ In Lönn, just add a *WingedAdder* Entity in your room.
 
 Then you can tweak its filter options to target the entities you want to add wings to, the behaviour of wings, positions and many more things :
 
-![image](https://github.com/user-attachments/assets/aa1257ad-4cd5-4d6c-bb56-88109f7957e8)
+![image](https://github.com/user-attachments/assets/720553a0-1350-4656-95c4-58fd88ea5c87)
 
 
 ### Filter Options :
@@ -34,7 +34,7 @@ Then you can tweak its filter options to target the entities you want to add win
 - **FlySpeed** & **FlyDelay** : specify the speed at wich you entity will fly, how many seconds after the player dashed
 - **Disable Collisions** : check this if you want your entity to not detect any collisions after the wings are activated (e.g. passing through walls)
 - **Allow Interactions** : for holdable objects only, specify if the player can grab the object once it begins to fly
-- **IsHeavyWings** : for holdables only, change the behaviour of the holdable once his wings are activated. It then lifts the player with it instead of being lifted by the player
+- **IsHeavyWings** : (JANK!) for holdables only, change the behaviour of the holdable once his wings are activated. It then lifts the player with it instead of being lifted by the player
 
 ### Customisation :
 - **Wings Offset** : allows you to place each wing independently in the Y and X axes
@@ -42,7 +42,9 @@ Then you can tweak its filter options to target the entities you want to add win
 - **Rainbow Wings** : because why not
 
 ### Dash Counter :
-- **Dashs To Activate** :
+- **Dashs To Activate** : tweak this value to enable the entity's fly after a set number of dashes in the room
+- **Counter Tint** : allows you to customize the color of the counter number
+- **Counter Offset** : allows you to place the counter where you want
 
 
 ---
@@ -50,4 +52,4 @@ Then you can tweak its filter options to target the entities you want to add win
 ## Notes
 
 Since this entity can target almost every entity, vanilla or modded, except some dose of Jank sometimes.
-Also, big thanks to JaThePlayer for bits of code from FrostHelper
+Also, big thanks to JaThePlayer for bits of code from FrostHelper and to SunsetQuasar from FemtoHelper
