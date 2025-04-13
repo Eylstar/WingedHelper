@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using Celeste.Mod.Entities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Monocle;
-using Celeste.Mod.UI;
-using System.Text.RegularExpressions;
 
 namespace Celeste.Mod.WingedHelper;
 
@@ -26,11 +22,15 @@ public class WingComponent : Component
     bool isOnAnActor;
     bool hasACollider;
 
+    bool routineAdded = false;
+
     Sprite sprite;
     Sprite leftWing;
     Sprite rightWing;
     Vector2 leftWingOffset;
     Vector2 rightWingOffset;
+    
+    Vector2 positionLastFrame;
     
     DashListener dashListener;
     Wiggler rotateWiggler;
@@ -45,20 +45,15 @@ public class WingComponent : Component
     float flyDelay;
     int flyingUpSpeed;
     FlyDirection flyDirection;
-    float horizontalForce;
-    float initialHorizontalForce = 400;
-    float maxXtobeAdded = 50f;
-    float XtobeAdded = 0;
     
     bool canBeGrabbed;
     bool isGrabbed;
-    bool justThrowed;
     public Holdable holdable;
     Vector2 playerSpeedOnGrab;
     
     Tween flyUpTween;
 
-    Vector2 wingActivationPositionStart;
+    Vector2 wingMovementOrigin;
     float wingActivationTime;
     
     Color leftWingColor;
@@ -73,7 +68,7 @@ public class WingComponent : Component
     
     int dashsToActivate;
     
-    PlutoniumText text;
+    PlutoniumText counter;
     Vector2 counterOffset;
     
     
@@ -93,12 +88,12 @@ public class WingComponent : Component
         interactionsAllowed = allowInter;
         leftWingColor = Calc.HexToColor(leftColor);
         rightWingColor = Calc.HexToColor(rightColor);
+        counterColor = Calc.HexToColor(counterCol);
         rainbowWings = rainbow;
         flySounds = flyS;
         flapSounds = flapS;
         dashsToActivate = dashs;
         counterOffset = counterOff;
-        counterColor = Calc.HexToColor(counterCol);
     }
 
     public override void Added(Entity entity)
@@ -106,10 +101,8 @@ public class WingComponent : Component
         base.Added(entity);
         
         player = Scene.Tracker.GetEntity<Player>();
-        
-        if (isOnAnActor) actor = (Actor) entity;
-        
-        Visible = true;
+        if (isOnAnActor) 
+            actor = (Actor) entity;
         
         canBeGrabbed = entity.Get<Holdable>() != null;
         if (canBeGrabbed)
@@ -120,8 +113,45 @@ public class WingComponent : Component
         }
         
         SetupSprites();
+        AddComponents();
         SetupTween();
+    }
+    
+    void SetupSprites()
+    {
+        Visible = true;
         
+        sprite = Entity.Get<Sprite>();
+
+        leftWing = GFX.SpriteBank.Create("WingedHelper_wing");
+        rightWing = GFX.SpriteBank.Create("WingedHelper_wing");
+        rightWing.FlipX = true;
+
+        if (hasACollider)
+        {
+            Collider collider = Entity.Collider;
+            leftWing.Position = new Vector2((collider.Left - leftWing.Width / 2) + 1, canBeGrabbed ? collider.Top : collider.Top + collider.Height / 4);
+            rightWing.Position = new Vector2((collider.Right + rightWing.Width / 2) - 1, canBeGrabbed ? collider.Top : collider.Top + collider.Height / 4);
+        }
+        else
+        {
+            leftWing.Position = new Vector2(Entity.Left - leftWing.Width / 2 + 1, Entity.Right - leftWing.Width / 2);
+            rightWing.Position = new Vector2(Entity.Right + rightWing.Width / 2 - 1, Entity.Right - rightWing.Width / 2);
+        }
+        
+        leftWing.Position += leftWingOffset;
+        rightWing.Position += rightWingOffset;
+        leftWing.Color = leftWingColor;
+        rightWing.Color = rightWingColor;
+        
+        Entity.Add(leftWing);
+        Entity.Add(rightWing);
+        leftWing.Play("flap");
+        rightWing.Play("flap");
+    }
+    
+    void AddComponents()
+    {
         dashListener = new DashListener();
         dashListener.OnDash = OnDash;
         Entity.Add(dashListener);
@@ -132,8 +162,10 @@ public class WingComponent : Component
             leftWing.Rotation = v * 35f * (float) Math.PI / 180f;
             rightWing.Rotation = -v * 35f * (float) Math.PI / 180f;
         });
-        
         Entity.Add(rotateWiggler);
+        
+        counter = new PlutoniumText("WingedHelper/numbers", "0123456789", new Vector2(4, 6));
+        Entity.Add(counter);
     }
     
     void SetupTween()
@@ -149,56 +181,36 @@ public class WingComponent : Component
             }
             
             float flewTime = (float) Math.Round(Engine.Scene.TimeActive - wingActivationTime, 2);
-
-            if (canBeGrabbed && justThrowed && wingsActivated && !isGrabbed)
+            
+            Vector2 GetDirection(FlyDirection direction) => direction switch
             {
-                float horizontalForceAbs = Math.Abs(horizontalForce);
-                float factor = 1 - (horizontalForceAbs / initialHorizontalForce);
-                XtobeAdded = (float)(maxXtobeAdded / (1 + Math.Exp(-6 * (factor - 0.5f)))) * Math.Sign(horizontalForce);
-                horizontalForce *= 0.95f;
-                if (Math.Abs(horizontalForce) <= 1f)
-                {
-                    horizontalForce = 0;
-                    XtobeAdded = (int)Math.Round(XtobeAdded);
-                    justThrowed = false;
-                }
-            }
-
-            Vector2 to = flyDirection switch
-            {
-                FlyDirection.Up => wingActivationPositionStart + new Vector2(XtobeAdded, -flyingUpSpeed * flewTime),
-                FlyDirection.Down => wingActivationPositionStart + new Vector2(XtobeAdded, flyingUpSpeed * flewTime),
-                FlyDirection.Left => new Vector2(wingActivationPositionStart.X + (-flyingUpSpeed * flewTime) + XtobeAdded, wingActivationPositionStart.Y),
-                FlyDirection.Right => new Vector2(wingActivationPositionStart.X + (flyingUpSpeed * flewTime) + XtobeAdded, wingActivationPositionStart.Y),
-                _  => new Vector2()
+                FlyDirection.Up => new Vector2(0, -1),
+                FlyDirection.Down => new Vector2(0, 1),
+                FlyDirection.Left => new Vector2(-1, 0),
+                FlyDirection.Right => new Vector2(1, 0),
+                _ => Vector2.Zero
             };
+            
+            Vector2 to = wingMovementOrigin + GetDirection(flyDirection) * flyingUpSpeed * flewTime;
 
-            if (heavyWings && isGrabbed && playerSpeedOnGrab.Length() >= 0.1f)
+            if (heavyWings && isGrabbed && playerSpeedOnGrab.Length() >= 0.1f && IsFlyVertical())
             {
                 playerSpeedOnGrab *= 0.9f;
-                to.X += playerSpeedOnGrab.X;
-                XtobeAdded += playerSpeedOnGrab.X;
+                wingMovementOrigin += playerSpeedOnGrab;
             }
 
             if (hasACollider && !collisionDisabled)
             {
-                if (flyDirection == FlyDirection.Up || flyDirection == FlyDirection.Down)
+                if (IsFlyVertical())
                     CheckColl(Entity.Position, to);
                 
-                else if (flyDirection == FlyDirection.Left || flyDirection == FlyDirection.Right)
+                else if (!IsFlyVertical())
                     CheckColl(to, Entity.Position);
    
                 void CheckColl(Vector2 a, Vector2 b)
                 {
                     if (Entity.CollideCheck<Solid>(new Vector2(a.X, b.Y)))
                         wingActivationTime += Engine.DeltaTime;
-                    
-                    if (Entity.CollideCheck<Solid>(new Vector2(b.X, a.Y)))
-                    {
-                        horizontalForce = 0;
-                        XtobeAdded = (int)Math.Round(XtobeAdded);
-                        justThrowed = false;
-                    }
                 }
             }
             
@@ -206,7 +218,7 @@ public class WingComponent : Component
             
             if (heavyWings && isGrabbed)
             {
-                if (flyDirection == FlyDirection.Left || flyDirection == FlyDirection.Right)
+                if (!IsFlyVertical())
                 {
                     player.Position.X = Entity.Position.X - player.carryOffset.X;
                 }
@@ -224,48 +236,14 @@ public class WingComponent : Component
         else if(isOnAnActor)
         {
             if (Math.Abs(actor.X - to.X) >= 0.5f)
-            {
                 actor.MoveH(to.X - actor.X);
-            }
             actor.MoveV(to.Y - (int)actor.Y);
         }
         else 
             Entity.Position = new Vector2((int)to.X, (int)to.Y);
-    }
-    
-    void SetupSprites()
-    {
-        sprite = Entity.Get<Sprite>();
-
-        leftWing = GFX.SpriteBank.Create("WingedHelper_wing");
-        rightWing = GFX.SpriteBank.Create("WingedHelper_wing");
-        rightWing.FlipX = true;
-
-        if (hasACollider)
-        {
-            Collider collider = Entity.Collider;
-            leftWing.Position = new Vector2((collider.Left - leftWing.Width / 2) + 1, canBeGrabbed ? collider.Top : collider.Top + collider.Height / 4);
-            rightWing.Position = new Vector2((collider.Right + rightWing.Width / 2) - 1, canBeGrabbed ? collider.Top : collider.Top + collider.Height / 4);
-            leftWing.Position += leftWingOffset;
-            rightWing.Position += rightWingOffset;
-        }
-        else
-        {
-            leftWing.Position = new Vector2(Entity.Left - leftWing.Width / 2 + 1, Entity.Right - leftWing.Width / 2);
-            rightWing.Position = new Vector2(Entity.Right + rightWing.Width / 2 - 1, Entity.Right - rightWing.Width / 2);
-        }
+        positionLastFrame = Entity.Position;
         
-        leftWing.Color = leftWingColor;
-        rightWing.Color = rightWingColor;
-        
-        Entity.Add(leftWing);
-        Entity.Add(rightWing);
-        leftWing.Play("flap");
-        rightWing.Play("flap");
-
-        
-        text = new PlutoniumText("WingedHelper/numbers", "0123456789", new Vector2(4, 6));
-        Entity.Add(text);
+        //if the entity moved during the rest of the frame, add his movement to the wing movement
     }
     
     void OnPickup()
@@ -276,45 +254,63 @@ public class WingComponent : Component
             playerSpeedOnGrab = player.Speed / 40;
             playerSpeedOnGrab.Y /= 2;
         }
-        
-        if (heavyWings)
-            return;
-        justThrowed = false;
-        flying = false;
+
+        if (heavyWings) return;
+
+        flying = true;
     }
 
     void OnRelease(Vector2 force)
     {
-        isGrabbed = false;
         if (wingsActivated)
         {
             flying = true;
-            XtobeAdded = 0;
-            wingActivationPositionStart = new Vector2((int)Entity.X, (int)Entity.Y);
+            wingMovementOrigin = new Vector2((int)Entity.X, (int)Entity.Y);
             wingActivationTime = Engine.Scene.TimeActive;
-            if (force.X != 0)
-            {
-                justThrowed = true;
-                horizontalForce = force.X * 300;
-                initialHorizontalForce = Math.Abs(horizontalForce);
-            }
+            positionLastFrame = Entity.Position;
         }
+        isGrabbed = false;
     }
 
     void OnDash(Vector2 dir)
     {
         if (flying || wingsActivated) return;
-        dashsToActivate--;
-        if (dashsToActivate <= 0)
+        
+        dashsToActivate = Math.Max(0, dashsToActivate - 1);
+        if (dashsToActivate == 0 && !routineAdded)
         {
             Entity.Add(new Coroutine(FlyAwayRoutine()));
-            dashsToActivate = 0;
+            routineAdded = true;
         }
     }
 
     public override void Update()
     {
         base.Update();
+        UpdateWings();
+
+        if (!flying)
+            positionLastFrame = Entity.Position;
+
+        if (isOnAnActor && flying && positionLastFrame.X != Entity.Position.X && !isGrabbed)
+        {
+            if (IsFlyVertical())
+                wingMovementOrigin.X = Entity.Position.X;
+            else
+                wingMovementOrigin.X += Entity.Position.X - positionLastFrame.X;
+        }
+
+        if (IsFlyVertical() && Math.Abs(Input.MoveX) > 0.1f && isGrabbed && heavyWings)
+        {
+            wingMovementOrigin.X += Input.MoveX * 0.5f;
+        }
+        
+        if (!flying) return;
+        flyUpTween.Update();
+    }
+
+    void UpdateWings()
+    {
         if (rainbowWings)
         {
             hue += Engine.DeltaTime * 0.4f;
@@ -323,20 +319,14 @@ public class WingComponent : Component
             rightWing.Color = Calc.HsvToColor(hue, 0.75f, 0.75f);
         }
         
-        if(leftWing.CurrentAnimationFrame % 9 == 4)
-        {
-            if (flapSounds)
-                Audio.Play("event:/game/general/strawberry_wingflap", Entity.Position);
-        }
-        
-        if (!flying) return;
-        flyUpTween.Update();
+        if(leftWing.CurrentAnimationFrame % 9 == 4 && flapSounds) 
+            Audio.Play("event:/game/general/strawberry_wingflap", Entity.Position);
     }
 
     public override void Render()
     {
         base.Render();
-        text.PrintCentered(Entity.Position + counterOffset, dashsToActivate.ToString(),  true, 5, counterColor, Color.Black, 1f);
+        counter.PrintCentered(Entity.Position + counterOffset, dashsToActivate.ToString(),  true, 5, counterColor, Color.Black, 1f);
     }
 
     IEnumerator FlyAwayRoutine()
@@ -354,20 +344,17 @@ public class WingComponent : Component
     {
         flying = true;
         wingsActivated = true;
-        wingActivationPositionStart = Entity.Position;
+        wingMovementOrigin = Entity.Position;
         wingActivationTime = Engine.Scene.TimeActive;
+        
         if (collisionDisabled)
-        {
             Entity.Collider = null;
-        }
 
         if (!interactionsAllowed)
         {
             Entity.Collidable = false;
             if (canBeGrabbed)
-            {
                 holdable.Entity.Collidable = false;
-            }
         }
     }
     
@@ -379,6 +366,11 @@ public class WingComponent : Component
             holdable.OnPickup -= OnPickup;
             holdable.OnRelease -= OnRelease;
         }
+    }
+    
+    bool IsFlyVertical()
+    {
+        return flyDirection == FlyDirection.Up || flyDirection == FlyDirection.Down;
     }
     
     static bool IsEntityFlying(Entity entity)
